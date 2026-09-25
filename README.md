@@ -16,13 +16,19 @@ Dilengkapi otentikasi kuat tahan bobol (Scrypt hashing, proteksi brute-force, ti
    - **Auto Lock Registration:** Pendaftaran publik otomatis dikunci permanen setelah akun admin MUA pertama berhasil didaftarkan.
 
 2. **Manajemen Invoice & Finansial MUA**
-   - Nomor invoice otomatis (`INV-YYYYMMDD-001`).
+   - Nomor Invoice otomatis harian berurutan (`INV-YYYYMMDD-001`, `INV-YYYYMMDD-002`, dst).
    - Jadwal & Lokasi Acara lengkap: Jenis Acara (Wedding, Lamaran, Wisuda, Photoshoot, dll), Tanggal, Jam, dan Alamat/Gedung Venue.
    - Tabel layanan dinamis: Pilihan cepat paket populer (Make Up Bride, Ibu Pengantin, Bridesmaid, Retouch, Sewa Aksesoris, dll).
    - Perhitungan otomatis Subtotal, Diskon, Uang Muka (DP), dan Sisa Pelunasan.
    - Status invoice: *Draft*, *DP Terbayar*, *Lunas*, *Dibatalkan*.
 
-3. **Cetak & Ekspor PDF Elegan**
+3. **Sistem Pencatatan Pembayaran & Riwayat Transaksi (Fitur Baru)**
+   - **Modal Catat Pembayaran:** Tombol nominal cepat (*Lunaskan Sisa*, *DP 30%*, *DP 50%*), pilihan metode transfer/QRIS/tunai, tanggal dan catatan bukti transfer.
+   - **Kalkulasi Saldo Otomatis:** Saldo tagihan langsung terpotong, status otomatis beralih menjadi DP Terbayar atau Lunas.
+   - **Riwayat Pembayaran Transparan:** Menampilkan daftar tiap pembayaran yang sudah diterima lengkap dengan tanggal dan metodenya di invoice.
+   - **Aksi Cepat Klien:** Tombol 1-klik *Salin No. Rekening* dan *Konfirmasi Bukti Transfer via WhatsApp*.
+
+4. **Cetak & Ekspor PDF Elegan**
    - **Cetak / Simpan PDF (A4 Native):** Tata letak presisi A4 bebas header/footer browser yang mengganggu, font vektor tajam, stempel status lunas.
    - **Download PDF Langsung:** Tombol download file `.pdf` langsung di browser menggunakan `html2canvas` dan `jsPDF`.
    - **Link Publik Invoice Klien:** Tautan invoice dapat dibagikan langsung ke pengantin/klien secara aman tanpa memerlukan login admin.
