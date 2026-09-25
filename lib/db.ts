@@ -125,10 +125,26 @@ export async function initDb(): Promise<void> {
     `);
 
     await db.execute(`
+      CREATE TABLE IF NOT EXISTS payments (
+        id TEXT PRIMARY KEY,
+        invoice_id TEXT NOT NULL,
+        amount REAL NOT NULL,
+        payment_date TEXT NOT NULL,
+        payment_method TEXT NOT NULL,
+        notes TEXT,
+        created_at INTEGER NOT NULL,
+        FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
+      );
+    `);
+
+    await db.execute(`
       CREATE INDEX IF NOT EXISTS idx_invoices_user ON invoices(user_id);
     `);
     await db.execute(`
       CREATE INDEX IF NOT EXISTS idx_items_invoice ON invoice_items(invoice_id);
+    `);
+    await db.execute(`
+      CREATE INDEX IF NOT EXISTS idx_payments_invoice ON payments(invoice_id);
     `);
     await db.execute(`
       CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token_hash);

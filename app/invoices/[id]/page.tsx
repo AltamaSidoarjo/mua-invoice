@@ -20,7 +20,11 @@ import {
   CheckCircle,
   CreditCard,
   Building2,
+  Copy,
+  Check,
+  PlusCircle,
 } from "lucide-react";
+import RecordPaymentModal from "@/components/RecordPaymentModal";
 
 export default function InvoiceDetailPage({
   params,
@@ -33,6 +37,8 @@ export default function InvoiceDetailPage({
   const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
   const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [copied, setCopied] = useState(false);
   const invoiceRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -137,15 +143,26 @@ export default function InvoiceDetailPage({
           )}
 
           <div className="flex flex-wrap items-center gap-2">
+            {/* Record Payment (Owner only) */}
+            {isOwner && (
+              <button
+                onClick={() => setShowPaymentModal(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+              >
+                <CreditCard className="w-3.5 h-3.5" />
+                Catat Pembayaran
+              </button>
+            )}
+
             {/* WhatsApp Share (Owner only) */}
             {isOwner && (
               <a
                 href={waUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold shadow-xs transition-colors"
               >
-                <Share2 className="w-3.5 h-3.5" />
+                <Share2 className="w-3.5 h-3.5 text-emerald-600" />
                 Kirim via WhatsApp
               </a>
             )}
@@ -360,17 +377,83 @@ export default function InvoiceDetailPage({
             </table>
           </div>
 
+          {/* Riwayat Pembayaran (Payment History) */}
+          <div className="pb-6 border-b border-slate-200">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                <CheckCircle className="w-4 h-4 text-emerald-600" />
+                Riwayat Pembayaran Masuk
+              </span>
+              {isOwner && (
+                <button
+                  type="button"
+                  onClick={() => setShowPaymentModal(true)}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition-colors cursor-pointer print:hidden"
+                >
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  + Catat Pembayaran
+                </button>
+              )}
+            </div>
+
+            {invoice.payments && invoice.payments.length > 0 ? (
+              <div className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-100 text-slate-500 font-semibold border-b border-slate-200">
+                    <tr>
+                      <th className="py-2 px-3">Tanggal</th>
+                      <th className="py-2 px-3">Metode</th>
+                      <th className="py-2 px-3">Catatan</th>
+                      <th className="py-2 px-3 text-right">Nominal Masuk</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {invoice.payments.map((p, idx) => (
+                      <tr key={idx} className="hover:bg-white/80">
+                        <td className="py-2 px-3 font-medium text-slate-900">{formatDateIndo(p.payment_date)}</td>
+                        <td className="py-2 px-3 text-slate-600">{p.payment_method}</td>
+                        <td className="py-2 px-3 text-slate-500 text-[11px]">{p.notes || "-"}</td>
+                        <td className="py-2 px-3 text-right font-mono font-bold text-emerald-600">{formatRupiah(p.amount)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="p-3 bg-slate-50 rounded-xl border border-dashed border-slate-200 flex items-center justify-between text-xs text-slate-400">
+                <span>Belum ada transaksi pembayaran masuk yang dicatat.</span>
+                <span className="font-semibold text-amber-600">Status: Menunggu Pembayaran / DP</span>
+              </div>
+            )}
+          </div>
+
           {/* Financial Breakdown & Payment Account Info */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-4 pb-8 border-t-2 border-slate-200">
             {/* Left: Bank Transfer Details */}
             <div className="space-y-3">
               <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <div className="flex items-center gap-2 text-slate-800 text-xs font-bold uppercase tracking-wide mb-2">
-                  <CreditCard className="w-4 h-4 text-rose-600" />
-                  Metode Pembayaran Transfer
+                <div className="flex items-center justify-between text-slate-800 text-xs font-bold uppercase tracking-wide mb-2.5">
+                  <span className="flex items-center gap-1.5">
+                    <CreditCard className="w-4 h-4 text-rose-600" />
+                    Metode Pembayaran Transfer
+                  </span>
+                  {profile?.bank_account && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(profile.bank_account);
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                      }}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded-md cursor-pointer transition-colors print:hidden"
+                    >
+                      {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                      <span>{copied ? "Tersalin!" : "Salin No. Rek"}</span>
+                    </button>
+                  )}
                 </div>
                 {profile?.bank_account ? (
-                  <div className="space-y-1 text-xs text-slate-700">
+                  <div className="space-y-1.5 text-xs text-slate-700 bg-white p-3 rounded-lg border border-slate-100">
                     <div className="flex items-center justify-between">
                       <span className="text-slate-500">Bank:</span>
                       <span className="font-bold text-slate-900">{profile.bank_name || "BCA"}</span>
@@ -393,7 +476,21 @@ export default function InvoiceDetailPage({
                     Belum mengatur rekening di menu Pengaturan.
                   </div>
                 )}
-                <div className="mt-3 pt-2 border-t border-slate-200 text-[11px] text-slate-500">
+
+                {/* Tombol Konfirmasi WhatsApp untuk Klien */}
+                {profile?.phone && (
+                  <a
+                    href={`https://wa.me/${profile.phone.replace(/\D/g, '').startsWith('0') ? '62' + profile.phone.replace(/\D/g, '').slice(1) : profile.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Halo Kak ${profile.owner_name || profile.business_name}, saya ${invoice.client_name} ingin konfirmasi telah melakukan transfer pembayaran Invoice ${invoice.invoice_number} sebesar ${formatRupiah(invoice.balance_due > 0 ? invoice.balance_due : invoice.subtotal - invoice.discount)}.`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-semibold transition-colors print:hidden"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-emerald-600" />
+                    Konfirmasi Bukti Transfer via WhatsApp
+                  </a>
+                )}
+                
+                <div className="mt-2 text-[11px] text-slate-500 text-center">
                   Mohon kirimkan bukti transfer setelah pembayaran dilakukan.
                 </div>
               </div>
@@ -487,6 +584,18 @@ export default function InvoiceDetailPage({
           </div>
         </div>
       </main>
+
+      {/* Modal Catat Pembayaran */}
+      {invoice && (
+        <RecordPaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          invoice={invoice}
+          onPaymentSuccess={(updated) => {
+            setInvoice(updated);
+          }}
+        />
+      )}
     </div>
   );
 }

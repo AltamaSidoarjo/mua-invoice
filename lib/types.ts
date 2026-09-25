@@ -26,6 +26,16 @@ export interface InvoiceItem {
   total_price: number;
 }
 
+export interface Payment {
+  id: string;
+  invoice_id: string;
+  amount: number;
+  payment_date: string;
+  payment_method: string;
+  notes: string;
+  created_at: number;
+}
+
 export interface Invoice {
   id: string;
   user_id: string;
@@ -48,4 +58,5 @@ export interface Invoice {
   created_at: number;
   updated_at: number;
   items?: InvoiceItem[];
+  payments?: Payment[];
 }

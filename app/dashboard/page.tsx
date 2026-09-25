@@ -22,7 +22,9 @@ import {
   AlertCircle,
   Sparkles,
   ExternalLink,
+  CreditCard,
 } from "lucide-react";
+import RecordPaymentModal from "@/components/RecordPaymentModal";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -43,6 +45,7 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [paymentInvoice, setPaymentInvoice] = useState<Invoice | null>(null);
 
   useEffect(() => {
     // Check auth
@@ -354,6 +357,15 @@ export default function DashboardPage() {
 
                   {/* Right Column: Actions */}
                   <div className="flex items-center gap-2 justify-end shrink-0">
+                    {/* Quick Record Payment */}
+                    <button
+                      onClick={() => setPaymentInvoice(inv)}
+                      title="Catat Pembayaran Masuk"
+                      className="p-2 rounded-xl text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer"
+                    >
+                      <CreditCard className="w-4 h-4" />
+                    </button>
+
                     {/* WhatsApp Button */}
                     <a
                       href={waUrl}
@@ -399,6 +411,19 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
+
+      {/* Modal Catat Pembayaran */}
+      {paymentInvoice && (
+        <RecordPaymentModal
+          isOpen={!!paymentInvoice}
+          onClose={() => setPaymentInvoice(null)}
+          invoice={paymentInvoice}
+          onPaymentSuccess={() => {
+            setPaymentInvoice(null);
+            loadData();
+          }}
+        />
+      )}
     </div>
   );
 }

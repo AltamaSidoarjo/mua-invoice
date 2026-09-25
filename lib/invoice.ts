@@ -99,6 +99,21 @@ export async function getInvoiceById(
     total_price: Number(item.total_price),
   }));
 
+  const paymentsRes = await db.execute({
+    sql: "SELECT * FROM payments WHERE invoice_id = ? ORDER BY created_at ASC;",
+    args: [id],
+  });
+
+  const payments: import("./types").Payment[] = paymentsRes.rows.map((p) => ({
+    id: String(p.id),
+    invoice_id: String(p.invoice_id),
+    amount: Number(p.amount),
+    payment_date: String(p.payment_date),
+    payment_method: String(p.payment_method),
+    notes: String(p.notes || ""),
+    created_at: Number(p.created_at),
+  }));
+
   return {
     id: String(row.id),
     user_id: String(row.user_id),
@@ -121,6 +136,7 @@ export async function getInvoiceById(
     created_at: Number(row.created_at),
     updated_at: Number(row.updated_at),
     items,
+    payments,
   };
 }
 
@@ -154,6 +170,21 @@ export async function getPublicInvoiceById(
     total_price: Number(item.total_price),
   }));
 
+  const paymentsRes = await db.execute({
+    sql: "SELECT * FROM payments WHERE invoice_id = ? ORDER BY created_at ASC;",
+    args: [id],
+  });
+
+  const payments: import("./types").Payment[] = paymentsRes.rows.map((p) => ({
+    id: String(p.id),
+    invoice_id: String(p.invoice_id),
+    amount: Number(p.amount),
+    payment_date: String(p.payment_date),
+    payment_method: String(p.payment_method),
+    notes: String(p.notes || ""),
+    created_at: Number(p.created_at),
+  }));
+
   const { getProfile } = await import("./profile");
   const profile = await getProfile(userId);
 
@@ -180,6 +211,7 @@ export async function getPublicInvoiceById(
       created_at: Number(row.created_at),
       updated_at: Number(row.updated_at),
       items,
+      payments,
     },
     profile,
   };
